@@ -93,23 +93,99 @@ const TRAITS = {
   singer: "Is a singer",
   actor: "Is an actor",
   athlete: "Is an athlete",
+  activist: "Is an activist",
+  politician: "Is a politician (General/Male)",
+  politician_female: "Is a female politician",
+  fiction_writer: "Is a fiction writer",
+  director: "Is a movie director",
+  comedian: "Is a comedian",
+  royal: "Is a member of a royal family",
+  historical: "Lived primarily before the year 2000",
+  writer: "Is a general author/poet",
+  scientist: "Is a scientist/inventor",
+  philanthropist: "Is a philanthropist or major donor",
+  sports_official: "Is a sports team manager or official",
+  music_composer: "Primarily known as a composer/music director",
   fictional: "Is fictional",
   anime: "From anime/manga",
-  activist: "Is an activist",
+  cartoon: "From Western cartoons (e.g., Disney, WB)"
 };
 
 /* Local sample DB with Biraj included */
 let characters = [
+  // --- CORE 20 CHARACTERS ---
   { name: "Rajesh Hamal", desc:"Nepali film actor", traits:{ real:true, male:true, fromNepal:true, actor:true }},
-  { name: "Rekha Thapa", desc:"Nepali actress and producer", traits:{ real:true, female:true, fromNepal:true, actor:true }},
+  { name: "Rekha Thapa", desc:"Nepali actress and producer", traits:{ real:true, female:true, fromNepal:true, actor:true, director:true }},
   { name: "Biraj Bhattarai", desc:"Nepali musical artist", traits:{ real:true, male:true, fromNepal:true, singer:true }},
-  { name: "Anuradha Koirala", desc:"Nepali activist (Maiti Nepal)", traits:{ real:true, female:true, fromNepal:true, activist:true }},
-  { name: "Narayan Gopal", desc:"Legendary Nepali singer (deceased)", traits:{ real:true, male:true, fromNepal:true, singer:true }},
+  { name: "Anuradha Koirala", desc:"Nepali activist (Maiti Nepal)", traits:{ real:true, female:true, fromNepal:true, activist:true, philanthropist:true }},
+  { name: "Narayan Gopal", desc:"Legendary Nepali singer (deceased)", traits:{ real:true, male:true, fromNepal:true, singer:true, historical:true, music_composer:true }},
   { name: "Nabin K Bhattarai", desc:"Nepali pop singer", traits:{ real:true, male:true, fromNepal:true, singer:true }},
   { name: "Lionel Messi", desc:"Footballer", traits:{ real:true, male:true, athlete:true }},
-  { name: "Pikachu", desc:"Pokemon creature", traits:{ real:false, fictional:true, anime:true }},
-  { name: "Sherlock Holmes", desc:"Fictional detective", traits:{ real:false, fictional:true }},
-  { name: "Naruto Uzumaki", desc:"Anime character", traits:{ real:false, fictional:true, anime:true }}
+  { name: "Pikachu", desc:"Pokemon creature", traits:{ real:false, fictional:true, anime:true, cartoon:false }},
+  { name: "Sherlock Holmes", desc:"Fictional detective", traits:{ real:false, fictional:true, fiction_writer:false }},
+  { name: "Naruto Uzumaki", desc:"Anime character", traits:{ real:false, fictional:true, anime:true, cartoon:false }},
+  { name: "Maha Sanchay", desc:"Nepali comedy duo (Madan Krishna/Hari Bansha)", traits:{ real:true, male:true, fromNepal:true, actor:true, comedian:true }},
+  { name: "B.P. Koirala", desc:"First democratically elected PM of Nepal, writer", traits:{ real:true, male:true, fromNepal:true, politician:true, fiction_writer:true, historical:true, writer:true }},
+  { name: "Gyanendra Shah", desc:"Last King of Nepal", traits:{ real:true, male:true, fromNepal:true, royal:true, historical:true }},
+  { name: "Deepak Raj Giri", desc:"Nepali comedian, actor, and director", traits:{ real:true, male:true, fromNepal:true, actor:true, comedian:true, director:true }},
+  { name: "Parijat", desc:"Nepali writer (Shirisha ko Phool)", traits:{ real:true, female:true, fromNepal:true, fiction_writer:true, historical:true, writer:true }},
+  { name: "J.K. Rowling", desc:"British author (Harry Potter)", traits:{ real:true, female:true, fiction_writer:true, writer:true }},
+  { name: "Barack Obama", desc:"Former US President", traits:{ real:true, male:true, politician:true }},
+  { name: "Mickey Mouse", desc:"Iconic Disney cartoon character", traits:{ real:false, fictional:true, cartoon:true, anime:false }},
+  { name: "Muhammad Ali", desc:"American boxing legend", traits:{ real:true, male:true, athlete:true, historical:true }},
+  { name: "Alfred Hitchcock", desc:"Legendary film director", traits:{ real:true, male:true, director:true, historical:true }},
+  
+  // --- SECOND 10 CHARACTERS ---
+  { name: "Laxmi Prasad Devkota", desc:"Great poet of Nepal (Mahakavi)", traits:{ real:true, male:true, fromNepal:true, writer:true, historical:true, fiction_writer:true }},
+  { name: "Pasang Lhamu Sherpa", desc:"First Nepali woman to climb Mt. Everest", traits:{ real:true, female:true, fromNepal:true, athlete:true, historical:true, activist:true }},
+  { name: "Prachanda (Puspa Kamal Dahal)", desc:"Current Prime Minister of Nepal", traits:{ real:true, male:true, fromNepal:true, politician:true }},
+  { name: "Dayahang Rai", desc:"Prominent Nepali actor and theatre artist", traits:{ real:true, male:true, fromNepal:true, actor:true }},
+  { name: "Aruna Lama", desc:"Legendary Nepali singer (deceased)", traits:{ real:true, female:true, fromNepal:true, singer:true, historical:true }},
+  { name: "Albert Einstein", desc:"Theoretical physicist (E=mc²)", traits:{ real:true, male:true, scientist:true, historical:true }},
+  { name: "Malala Yousafzai", desc:"Pakistani activist for female education", traits:{ real:true, female:true, activist:true }},
+  { name: "Elon Musk", desc:"CEO of Tesla and SpaceX", traits:{ real:true, male:true, scientist:false, philanthropist:true }},
+  { name: "SpongeBob SquarePants", desc:"Fictional cartoon character", traits:{ real:false, fictional:true, cartoon:true, anime:false }},
+  { name: "Issac Newton", desc:"English physicist and mathematician", traits:{ real:true, male:true, scientist:true, historical:true }},
+
+  // --- NEW 30 CHARACTERS (Final Expansion to 50) ---
+
+  // More Nepali Figures
+  { name: "Tulsi Ghimire", desc:"Veteran Nepali film director/actor", traits:{ real:true, male:true, fromNepal:true, director:true, actor:true }},
+  { name: "Khadga Prasad Oli (KP Oli)", desc:"Former Prime Minister of Nepal", traits:{ real:true, male:true, fromNepal:true, politician:true }},
+  { name: "Bidya Devi Bhandari", desc:"Former President of Nepal", traits:{ real:true, female:true, fromNepal:true, politician:true_female, politician:false }},
+  { name: "Harihar Sharma", desc:"Renowned Nepali theatre artist and actor", traits:{ real:true, male:true, fromNepal:true, actor:true }},
+  { name: "Amrit Gurung", desc:"Lead singer of Nepali band Nepathya", traits:{ real:true, male:true, fromNepal:true, singer:true }},
+  { name: "Deepa Shree Niraula", desc:"Nepali actress, comedian, and director", traits:{ real:true, female:true, fromNepal:true, actor:true, comedian:true, director:true }},
+  { name: "Sunil Thapa", desc:"Prominent Nepali villain/character actor", traits:{ real:true, male:true, fromNepal:true, actor:true }},
+  { name: "Jharana Thapa", desc:"Nepali actress and director", traits:{ real:true, female:true, fromNepal:true, actor:true, director:true }},
+  { name: "Buddha (Siddhartha Gautam)", desc:"Founder of Buddhism (Born in Nepal)", traits:{ real:true, male:true, historical:true, activist:true }},
+  { name: "Captain Marvel (Brie Larson)", desc:"Fictional superhero in the MCU", traits:{ real:false, fictional:true, female:true, actor:false }},
+
+  // More International Figures (Sports, Music, Science)
+  { name: "Cristiano Ronaldo", desc:"Portuguese Footballer", traits:{ real:true, male:true, athlete:true }},
+  { name: "Michael Jordan", desc:"American basketball legend", traits:{ real:true, male:true, athlete:true, historical:true }},
+  { name: "Sachin Tendulkar", desc:"Indian cricket legend", traits:{ real:true, male:true, athlete:true }},
+  { name: "Mother Teresa", desc:"Catholic saint and humanitarian", traits:{ real:true, female:true, historical:true, activist:true, philanthropist:true }},
+  { name: "Jane Goodall", desc:"Primatologist and anthropologist", traits:{ real:true, female:true, scientist:true, activist:true }},
+  { name: "A.R. Rahman", desc:"Indian music composer and singer", traits:{ real:true, male:true, singer:true, music_composer:true }},
+  { name: "Steve Jobs", desc:"Co-founder of Apple", traits:{ real:true, male:true, historical:true, scientist:false }},
+  { name: "Oprah Winfrey", desc:"American media executive and philanthropist", traits:{ real:true, female:true, philanthropist:true, actor:true }},
+  { name: "Quentin Tarantino", desc:"American film director", traits:{ real:true, male:true, director:true }},
+  { name: "Jeff Bezos", desc:"Founder of Amazon", traits:{ real:true, male:true, philanthropist:true }},
+
+  // More Fictional Characters
+  { name: "Goku", desc:"Protagonist of Dragon Ball Z", traits:{ real:false, fictional:true, male:true, anime:true, cartoon:false }},
+  { name: "Wonder Woman", desc:"DC Comics superhero", traits:{ real:false, fictional:true, female:true, cartoon:false }},
+  { name: "Doraemon", desc:"Japanese robotic cat (manga/anime)", traits:{ real:false, fictional:true, male:true, anime:true, cartoon:false }},
+  { name: "Captain Haddock", desc:"Character from The Adventures of Tintin", traits:{ real:false, fictional:true, male:true, historical:true }},
+  { name: "Harry Potter", desc:"Protagonist of the book series", traits:{ real:false, fictional:true, male:true, fiction_writer:false }},
+
+  // Miscellaneous Figures
+  { name: "Dalai Lama", desc:"Spiritual leader of Tibetan Buddhism", traits:{ real:true, male:true, activist:true }},
+  { name: "Bill Gates", desc:"Co-founder of Microsoft", traits:{ real:true, male:true, philanthropist:true }},
+  { name: "Jacinda Ardern", desc:"Former Prime Minister of New Zealand", traits:{ real:true, female:true, politician_female:true, politician:false }},
+  { name: "Siddhartha Rana", desc:"Nepali music producer/composer", traits:{ real:true, male:true, fromNepal:true, music_composer:true }},
+  { name: "Roger Federer", desc:"Swiss tennis player", traits:{ real:true, male:true, athlete:true }}
 ];
 
 /* GAME STATE */
