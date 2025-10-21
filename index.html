@@ -1,188 +1,160 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Mini Akinator — Wikipedia + Nepal Edition</title>
-  <style>
-    :root {
-      --bg: #0f1724;
-      --card: #0b1220;
-      --accent: #10b981;
-      --text: #f1f5f9;
-      --muted: #94a3b8;
-    }
-
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: "Poppins", "Segoe UI", sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      margin: 0;
-      padding: 20px;
-    }
-
-    .game-box {
-      background: var(--card);
-      border-radius: 16px;
-      padding: 30px;
-      max-width: 460px;
-      text-align: center;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-      width: 100%;
-    }
-
-    h1 {
-      color: var(--accent);
-      font-size: 1.8rem;
-    }
-
-    #question {
-      margin: 25px 0;
-      font-size: 1.1rem;
-      min-height: 2em;
-    }
-
-    .btn-group {
-      display: flex;
-      justify-content: center;
-      gap: 15px;
-      flex-wrap: wrap;
-    }
-
-    button {
-      background: var(--accent);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      padding: 10px 22px;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: 0.25s;
-    }
-
-    button:hover {
-      transform: scale(1.05);
-      background: #0ea271;
-    }
-
-    footer {
-      margin-top: 20px;
-      font-size: 0.8rem;
-      color: var(--muted);
-    }
-
-    #loading {
-      color: var(--muted);
-      font-style: italic;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mini Akinator — Live & Offline</title>
+<style>
+:root {
+  --bg:#0f1724;
+  --card:#0b1220;
+  --accent:#10b981;
+  --text:#f1f5f9;
+  --muted:#94a3b8;
+}
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family:"Poppins","Segoe UI",sans-serif;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+  margin:0;
+  padding:20px;
+}
+.game-box {
+  background:var(--card);
+  border-radius:16px;
+  padding:30px;
+  max-width:460px;
+  text-align:center;
+  box-shadow:0 4px 20px rgba(0,0,0,0.4);
+  width:100%;
+}
+h1 { color:var(--accent); font-size:1.8rem; }
+#question { margin:25px 0; font-size:1.1rem; min-height:2em; }
+#loading { color:var(--muted); font-style:italic; }
+.btn-group { display:flex; justify-content:center; gap:15px; flex-wrap:wrap; }
+button {
+  background: var(--accent);
+  color:white;
+  border:none;
+  border-radius:8px;
+  padding:10px 22px;
+  font-size:1rem;
+  cursor:pointer;
+  transition:0.25s;
+}
+button:hover { transform:scale(1.05); background:#0ea271; }
+footer { margin-top:20px; font-size:0.8rem; color:var(--muted);}
+</style>
 </head>
 <body>
-  <div class="game-box">
-    <h1>🧞 Mini Akinator — Wikipedia + Nepal Edition</h1>
-    <p id="loading">Fetching live Wikipedia data...</p>
-    <p id="question" style="display:none;"></p>
-    <div class="btn-group" style="display:none;">
-      <button onclick="answer('yes')">Yes</button>
-      <button onclick="answer('no')">No</button>
-    </div>
-    <footer>© 2025 Mini Akinator — Nepal & Wikipedia Edition</footer>
+<div class="game-box">
+  <h1>🧞 Mini Akinator — Live & Offline</h1>
+  <p id="loading">Loading characters...</p>
+  <p id="question" style="display:none;"></p>
+  <div class="btn-group" style="display:none;">
+    <button onclick="answer('yes')">Yes</button>
+    <button onclick="answer('no')">No</button>
   </div>
+  <footer>© 2025 Mini Akinator</footer>
+</div>
 
-  <script>
-    let people = [];
-    let remaining = [];
-    let qIndex = 0;
+<script>
+// Offline fallback dataset
+const offlinePeople = [
+  {name:"Biraj Bhattarai", male:true, fromAsia:true, musician:true, alive:true},
+  {name:"Raju Lama", male:true, fromAsia:true, musician:true, alive:true},
+  {name:"Sabin Rai", male:true, fromAsia:true, musician:true, alive:true},
+  {name:"Bartika Eam Rai", male:false, fromAsia:true, musician:true, alive:true},
+  {name:"Sajjan Raj Vaidya", male:true, fromAsia:true, musician:true, alive:true},
+  {name:"Neetesh Jung Kunwar", male:true, fromAsia:true, musician:true, alive:true},
+  {name:"Taylor Swift", male:false, fromAsia:false, musician:true, alive:true},
+  {name:"Elon Musk", male:true, fromAsia:false, musician:false, alive:true},
+  {name:"MrBeast", male:true, fromAsia:false, musician:false, alive:true},
+  {name:"Mr. Bean", male:true, fromAsia:false, musician:false, alive:true}
+];
 
-    const customPeople = [
-      { name: "Biraj Bhattarai", male: true, fromAsia: true, musician: true, alive: true },
-      { name: "Raju Lama", male: true, fromAsia: true, musician: true, alive: true },
-      { name: "Sabin Rai", male: true, fromAsia: true, musician: true, alive: true },
-      { name: "Bartika Eam Rai", male: false, fromAsia: true, musician: true, alive: true },
-      { name: "Sajjan Raj Vaidya", male: true, fromAsia: true, musician: true, alive: true },
-      { name: "Neetesh Jung Kunwar", male: true, fromAsia: true, musician: true, alive: true }
-    ];
+let people = [];
+let remaining = [];
+let qIndex = 0;
 
-    const questions = [
-      { text: "Is your character male?", key: "male" },
-      { text: "Is your character from Asia?", key: "fromAsia" },
-      { text: "Is your character a musician?", key: "musician" },
-      { text: "Is your character still alive?", key: "alive" }
-    ];
+const questions = [
+  {text:"Is your character male?", key:"male"},
+  {text:"Is your character from Asia?", key:"fromAsia"},
+  {text:"Is your character a musician?", key:"musician"},
+  {text:"Is your character still alive?", key:"alive"}
+];
 
-    async function fetchPeople() {
-      const query = `
-        SELECT ?person ?personLabel ?genderLabel ?countryLabel ?occupationLabel ?death WHERE {
-          ?person wdt:P31 wd:Q5.
-          OPTIONAL { ?person wdt:P21 ?gender. }
-          OPTIONAL { ?person wdt:P27 ?country. }
-          OPTIONAL { ?person wdt:P106 ?occupation. }
-          OPTIONAL { ?person wdt:P570 ?death. }
-          SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
-        } LIMIT 30
-      `;
-      const url = "https://query.wikidata.org/sparql?query=" + encodeURIComponent(query);
-      const res = await fetch(url, { headers: { Accept: "application/sparql-results+json" } });
-      const data = await res.json();
+const loadingEl = document.getElementById("loading");
+const questionEl = document.getElementById("question");
+const btnGroup = document.querySelector(".btn-group");
 
-      const wikiPeople = data.results.bindings.map(b => ({
-        name: b.personLabel?.value || "Unknown",
-        male: b.genderLabel?.value === "male",
-        fromAsia: b.countryLabel?.value && /India|Nepal|China|Japan|Korea|Pakistan|Bangladesh|Sri Lanka|Thailand|Indonesia/i.test(b.countryLabel.value),
-        musician: b.occupationLabel?.value && /singer|musician|composer|rapper|guitarist/i.test(b.occupationLabel.value),
-        alive: !b.death
-      }));
+// Function to fetch live people from Wikidata
+async function fetchLivePeople() {
+  try {
+    const query = `
+      SELECT ?person ?personLabel ?genderLabel ?countryLabel ?occupationLabel ?death WHERE {
+        ?person wdt:P31 wd:Q5.
+        OPTIONAL { ?person wdt:P21 ?gender. }
+        OPTIONAL { ?person wdt:P27 ?country. }
+        OPTIONAL { ?person wdt:P106 ?occupation. }
+        OPTIONAL { ?person wdt:P570 ?death. }
+        SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
+      } LIMIT 20
+    `;
+    const url = "https://query.wikidata.org/sparql?query="+encodeURIComponent(query);
+    const res = await fetch(url, { headers: {"Accept":"application/sparql-results+json"}});
+    const data = await res.json();
+    const livePeople = data.results.bindings.map(b=>({
+      name: b.personLabel?.value || "Unknown",
+      male: b.genderLabel?.value==="male",
+      fromAsia: b.countryLabel?.value && /India|Nepal|China|Japan|Korea|Pakistan|Bangladesh|Sri Lanka|Thailand|Indonesia/i.test(b.countryLabel.value),
+      musician: b.occupationLabel?.value && /singer|musician|composer|rapper|guitarist/i.test(b.occupationLabel.value),
+      alive: !b.death
+    }));
+    people = [...offlinePeople, ...livePeople];
+    startGame();
+  } catch(e) {
+    console.log("Live fetch failed, using offline dataset", e);
+    people = [...offlinePeople];
+    startGame();
+  }
+}
 
-      // Combine local + Wikipedia people
-      people = [...customPeople, ...wikiPeople];
-      remaining = [...people];
+function startGame() {
+  remaining = [...people];
+  qIndex = 0;
+  loadingEl.style.display="none";
+  questionEl.style.display="block";
+  btnGroup.style.display="flex";
+  showQuestion();
+}
 
-      document.getElementById("loading").style.display = "none";
-      document.getElementById("question").style.display = "block";
-      document.querySelector(".btn-group").style.display = "flex";
+function showQuestion() {
+  if(qIndex<questions.length) questionEl.textContent = questions[qIndex].text;
+  else guessCharacter();
+}
 
-      showQuestion();
-    }
+function answer(ans) {
+  const key = questions[qIndex].key;
+  const yes = ans==="yes";
+  remaining = remaining.filter(c=>c[key]===yes);
+  qIndex++;
+  if(remaining.length<=1 || qIndex>=questions.length) guessCharacter();
+  else showQuestion();
+}
 
-    function showQuestion() {
-      if (qIndex < questions.length) {
-        document.getElementById("question").textContent = questions[qIndex].text;
-      } else {
-        guessCharacter();
-      }
-    }
+function guessCharacter() {
+  btnGroup.style.display="none";
+  if(remaining.length===0) questionEl.textContent="I couldn’t guess your character 😅";
+  else questionEl.textContent = `I guess... ${remaining[Math.floor(Math.random()*remaining.length)].name}! 🎯`;
+}
 
-    function answer(ans) {
-      const key = questions[qIndex].key;
-      const yes = ans === "yes";
-      remaining = remaining.filter(c => c[key] === yes);
-      qIndex++;
-
-      if (remaining.length <= 1 || qIndex >= questions.length) {
-        guessCharacter();
-      } else {
-        showQuestion();
-      }
-    }
-
-    function guessCharacter() {
-      const q = document.getElementById("question");
-      const btns = document.querySelector(".btn-group");
-      btns.style.display = "none";
-
-      if (remaining.length === 0) {
-        q.textContent = "I couldn’t guess your character 😅 (try again)";
-      } else {
-        const guess = remaining[Math.floor(Math.random() * remaining.length)];
-        q.textContent = `I guess... ${guess.name}! 🎯`;
-      }
-    }
-
-    fetchPeople();
-  </script>
+// Start fetching
+fetchLivePeople();
+</script>
 </body>
 </html>
