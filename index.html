@@ -152,14 +152,14 @@ let characters = [
   // More Nepali Figures
   { name: "Tulsi Ghimire", desc:"Veteran Nepali film director/actor", traits:{ real:true, male:true, fromNepal:true, director:true, actor:true }},
   { name: "Khadga Prasad Oli (KP Oli)", desc:"Former Prime Minister of Nepal", traits:{ real:true, male:true, fromNepal:true, politician:true }},
-  { name: "Bidya Devi Bhandari", desc:"Former President of Nepal", traits:{ real:true, female:true, fromNepal:true, politician:true_female, politician:false }},
+  { name: "Bidya Devi Bhandari", desc:"Former President of Nepal", traits:{ real:true, female:true, fromNepal:true, politician_female:true }},
   { name: "Harihar Sharma", desc:"Renowned Nepali theatre artist and actor", traits:{ real:true, male:true, fromNepal:true, actor:true }},
   { name: "Amrit Gurung", desc:"Lead singer of Nepali band Nepathya", traits:{ real:true, male:true, fromNepal:true, singer:true }},
   { name: "Deepa Shree Niraula", desc:"Nepali actress, comedian, and director", traits:{ real:true, female:true, fromNepal:true, actor:true, comedian:true, director:true }},
   { name: "Sunil Thapa", desc:"Prominent Nepali villain/character actor", traits:{ real:true, male:true, fromNepal:true, actor:true }},
   { name: "Jharana Thapa", desc:"Nepali actress and director", traits:{ real:true, female:true, fromNepal:true, actor:true, director:true }},
   { name: "Buddha (Siddhartha Gautam)", desc:"Founder of Buddhism (Born in Nepal)", traits:{ real:true, male:true, historical:true, activist:true }},
-  { name: "Captain Marvel (Brie Larson)", desc:"Fictional superhero in the MCU", traits:{ real:false, fictional:true, female:true, actor:false }},
+  { name: "Captain Marvel (Brie Larson)", desc:"Fictional superhero in the MCU", traits:{ real:false, fictional:true, female:true }},
 
   // More International Figures (Sports, Music, Science)
   { name: "Cristiano Ronaldo", desc:"Portuguese Footballer", traits:{ real:true, male:true, athlete:true }},
@@ -168,7 +168,7 @@ let characters = [
   { name: "Mother Teresa", desc:"Catholic saint and humanitarian", traits:{ real:true, female:true, historical:true, activist:true, philanthropist:true }},
   { name: "Jane Goodall", desc:"Primatologist and anthropologist", traits:{ real:true, female:true, scientist:true, activist:true }},
   { name: "A.R. Rahman", desc:"Indian music composer and singer", traits:{ real:true, male:true, singer:true, music_composer:true }},
-  { name: "Steve Jobs", desc:"Co-founder of Apple", traits:{ real:true, male:true, historical:true, scientist:false }},
+  { name: "Steve Jobs", desc:"Co-founder of Apple", traits:{ real:true, male:true, historical:true }},
   { name: "Oprah Winfrey", desc:"American media executive and philanthropist", traits:{ real:true, female:true, philanthropist:true, actor:true }},
   { name: "Quentin Tarantino", desc:"American film director", traits:{ real:true, male:true, director:true }},
   { name: "Jeff Bezos", desc:"Founder of Amazon", traits:{ real:true, male:true, philanthropist:true }},
@@ -183,7 +183,7 @@ let characters = [
   // Miscellaneous Figures
   { name: "Dalai Lama", desc:"Spiritual leader of Tibetan Buddhism", traits:{ real:true, male:true, activist:true }},
   { name: "Bill Gates", desc:"Co-founder of Microsoft", traits:{ real:true, male:true, philanthropist:true }},
-  { name: "Jacinda Ardern", desc:"Former Prime Minister of New Zealand", traits:{ real:true, female:true, politician_female:true, politician:false }},
+  { name: "Jacinda Ardern", desc:"Former Prime Minister of New Zealand", traits:{ real:true, female:true, politician_female:true }},
   { name: "Siddhartha Rana", desc:"Nepali music producer/composer", traits:{ real:true, male:true, fromNepal:true, music_composer:true }},
   { name: "Roger Federer", desc:"Swiss tennis player", traits:{ real:true, male:true, athlete:true }}
 ];
@@ -220,13 +220,13 @@ const statTraits = document.getElementById('statTraits');
 const dbPreview = document.getElementById('dbPreview');
 
 /* HELPERS */
-function updateDbPreview(){ dbPreview.innerHTML=''; characters.forEach(c=>{ const d=document.createElement('div'); d.style.padding='6px 0'; d.innerHTML=`<strong>${c.name}</strong> <div style="color:#94a3b8;font-size:13px">${c.desc||''}</div><div style="color:#94a3b8;font-size:13px">traits: ${Object.keys(c.traits||{}).filter(t=>c.traits[t]).join(', ')||'—'}</div>`; dbPreview.appendChild(d); }); statTraits.textContent = Object.keys(TRAITS).length; }
+function updateDbPreview(){ dbPreview.innerHTML=''; characters.forEach(c=>{ const d=document.createElement('div'); d.style.padding='6px 0'; d.innerHTML=`<strong>${c.name}</strong> <div style="color:#94a3b8;font-size:13px">${c.desc||''}</div><div style="color:#94a3b8;font-size:13px">traits: ${Object.keys(c.traits||{}).filter(t=>c.traits[t]).join(', ')||'—'}</div>`; dbPreview.appendChild(d); }); statTraits.textContent = Object.keys(TRAITS).length; statCand.textContent = characters.length; } // <-- Added character count update here
 
 function renderTraitCheckboxes(){ traitsGrid.innerHTML=''; Object.keys(TRAITS).forEach(k=>{ const lbl=document.createElement('label'); lbl.style.display='flex'; lbl.style.gap='8px'; lbl.innerHTML=`<input type="checkbox" value="${k}"> ${TRAITS[k]}`; traitsGrid.appendChild(lbl); }); }
 
 function startGame(){ askedQuestions=[]; questionCount=0; history=[]; guessCard.hidden=true; finishCard.hidden=true; addResult.style.display='none'; newNameIn.value=''; newDescIn.value=''; candidates=characters.map((_,i)=>i); updateUIForNextQuestion("Think of a character — I'll ask questions."); }
 
-function updateUIForNextQuestion(initialText){ askedCount.textContent=questionCount; cLeft.textContent=candidates.length; statAsked.textContent=questionCount; statCand.textContent=candidates.length; updateDbPreview(); if(candidates.length<=1 || questionCount>=MAX_QUESTIONS){ makeGuess(); return; } const remainingTraits = Object.keys(TRAITS).filter(t=>!askedQuestions.includes(t)); let q=null; let bestScore=Infinity; remainingTraits.forEach(tr=>{ let ct=0; candidates.forEach(i=>{if(characters[i].traits && characters[i].traits[tr]) ct++;}); const n=candidates.length; if(ct===0||ct===n) return; const score=Math.abs(n/2-ct); if(score<bestScore){bestScore=score; q=tr;} }); if(!q) q=remainingTraits[0]||Object.keys(TRAITS)[0]; qText.dataset.currentTrait=q; qText.textContent=initialText?initialText:TRAITS[q]; progress.style.width=Math.min(100,Math.round((questionCount/MAX_QUESTIONS)*100))+'%'; candidatesList.textContent="Candidates: "+candidates.map(i=>characters[i].name).slice(0,8).join(', ')+(candidates.length>8?', ...':''); }
+function updateUIForNextQuestion(initialText){ askedCount.textContent=questionCount; cLeft.textContent=candidates.length; statAsked.textContent=questionCount; statCand.textContent=characters.length; updateDbPreview(); if(candidates.length<=1 || questionCount>=MAX_QUESTIONS){ makeGuess(); return; } const remainingTraits = Object.keys(TRAITS).filter(t=>!askedQuestions.includes(t)); let q=null; let bestScore=Infinity; remainingTraits.forEach(tr=>{ let ct=0; candidates.forEach(i=>{if(characters[i].traits && characters[i].traits[tr]) ct++;}); const n=candidates.length; if(ct===0||ct===n) return; const score=Math.abs(n/2-ct); if(score<bestScore){bestScore=score; q=tr;} }); if(!q) q=remainingTraits[0]||Object.keys(TRAITS)[0]; qText.dataset.currentTrait=q; qText.textContent=initialText?initialText:TRAITS[q]; progress.style.width=Math.min(100,Math.round((questionCount/MAX_QUESTIONS)*100))+'%'; candidatesList.textContent="Candidates: "+candidates.map(i=>characters[i].name).slice(0,8).join(', ')+(candidates.length>8?', ...':''); }
 
 function answer(ans){ const t=qText.dataset.currentTrait; askedQuestions.push(t); questionCount++; history.push({q:t,ans}); if(ans==='yes') candidates=candidates.filter(i=>!!characters[i].traits[t]); else if(ans==='no') candidates=candidates.filter(i=>!characters[i].traits[t]); if(candidates.length===0){ qText.textContent="I couldn't find a match — add it!"; finishCard.hidden=false; guessCard.hidden=true; return; } if(candidates.length<=2 || questionCount>=MAX_QUESTIONS){ makeGuess(); return; } updateUIForNextQuestion(); }
 
@@ -252,9 +252,8 @@ cancelAdd.addEventListener('click',()=>{ finishCard.hidden=true; startGame(); })
 
 /* INIT */
 renderTraitCheckboxes();
-updateDbPreview();
-startGame();
-
+updateDbPreview(); // Call first to set initial trait and character counts in the right panel
+startGame(); 
 </script>
 </body>
 </html>
