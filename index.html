@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Mini Akinator — Live & Offline</title>
+<title>Mini Akinator — Age Groups</title>
 <style>
 :root {
   --bg:#0f1724;
@@ -18,7 +18,7 @@ body {
   font-family:"Poppins","Segoe UI",sans-serif;
   display:flex;
   justify-content:center;
-  align-items:center;
+  align-items:flex-start;
   min-height:100vh;
   margin:0;
   padding:20px;
@@ -27,15 +27,15 @@ body {
   background:var(--card);
   border-radius:16px;
   padding:30px;
-  max-width:460px;
+  max-width:500px;
+  width:100%;
   text-align:center;
   box-shadow:0 4px 20px rgba(0,0,0,0.4);
-  width:100%;
 }
 h1 { color:var(--accent); font-size:1.8rem; }
-#question { margin:25px 0; font-size:1.1rem; min-height:2em; }
+#question { margin:20px 0; font-size:1.2rem; min-height:2em; }
 #loading { color:var(--muted); font-style:italic; }
-.btn-group { display:flex; justify-content:center; gap:15px; flex-wrap:wrap; }
+.btn-group, #yesno-group, #add-character-form { display:flex; justify-content:center; gap:15px; flex-wrap:wrap; margin-top:15px;}
 button {
   background: var(--accent);
   color:white;
@@ -47,39 +47,61 @@ button {
   transition:0.25s;
 }
 button:hover { transform:scale(1.05); background:#0ea271; }
+input[type=text], select { padding:5px; border-radius:6px; border:none; margin:5px 0; width:90%; }
 footer { margin-top:20px; font-size:0.8rem; color:var(--muted);}
 </style>
 </head>
 <body>
 <div class="game-box">
-  <h1>🧞 Mini Akinator — Live & Offline</h1>
-  <p id="loading">Loading characters...</p>
-  <p id="question" style="display:none;"></p>
-  <div class="btn-group" style="display:none;">
-    <button onclick="answer('yes')">Yes</button>
-    <button onclick="answer('no')">No</button>
-  </div>
-  <footer>© 2025 Mini Akinator</footer>
+<h1>🧞 Mini Akinator — Age Groups</h1>
+<p id="loading">Loading characters...</p>
+<p id="question" style="display:none;"></p>
+
+<div class="btn-group" style="display:none;">
+  <button onclick="answer('yes')">Yes</button>
+  <button onclick="answer('no')">No</button>
+</div>
+
+<div id="yesno-group" style="display:none;">
+  <p>Did I guess it right?</p>
+  <button onclick="guessConfirmed(true)">Yes</button>
+  <button onclick="guessConfirmed(false)">No</button>
+</div>
+
+<div id="add-character-form" style="display:none; flex-direction:column; text-align:left;">
+  <p>Add your character so I can learn:</p>
+  <input type="text" id="new-name" placeholder="Name">
+  <input type="number" id="new-age" placeholder="Age">
+  <select id="new-gender"><option value="male">Male</option><option value="female">Female</option></select>
+  <select id="new-asia"><option value="true">From Asia</option><option value="false">Not from Asia</option></select>
+  <select id="new-musician"><option value="true">Musician</option><option value="false">Not Musician</option></select>
+  <select id="new-alive"><option value="true">Alive</option><option value="false">Not Alive</option></select>
+  <button onclick="addCharacter()">Add Character</button>
+</div>
+
+<footer>© 2025 Mini Akinator</footer>
 </div>
 
 <script>
-// Offline fallback dataset
+// Offline fallback dataset with age
 const offlinePeople = [
-  {name:"Biraj Bhattarai", male:true, fromAsia:true, musician:true, alive:true},
-  {name:"Raju Lama", male:true, fromAsia:true, musician:true, alive:true},
-  {name:"Sabin Rai", male:true, fromAsia:true, musician:true, alive:true},
-  {name:"Bartika Eam Rai", male:false, fromAsia:true, musician:true, alive:true},
-  {name:"Sajjan Raj Vaidya", male:true, fromAsia:true, musician:true, alive:true},
-  {name:"Neetesh Jung Kunwar", male:true, fromAsia:true, musician:true, alive:true},
-  {name:"Taylor Swift", male:false, fromAsia:false, musician:true, alive:true},
-  {name:"Elon Musk", male:true, fromAsia:false, musician:false, alive:true},
-  {name:"MrBeast", male:true, fromAsia:false, musician:false, alive:true},
-  {name:"Mr. Bean", male:true, fromAsia:false, musician:false, alive:true}
+  {name:"Biraj Bhattarai", male:true, fromAsia:true, musician:true, alive:true, age:28},
+  {name:"Raju Lama", male:true, fromAsia:true, musician:true, alive:true, age:50},
+  {name:"Sabin Rai", male:true, fromAsia:true, musician:true, alive:true, age:45},
+  {name:"Bartika Eam Rai", male:false, fromAsia:true, musician:true, alive:true, age:25},
+  {name:"Sajjan Raj Vaidya", male:true, fromAsia:true, musician:true, alive:true, age:30},
+  {name:"Neetesh Jung Kunwar", male:true, fromAsia:true, musician:true, alive:true, age:27},
+  {name:"Taylor Swift", male:false, fromAsia:false, musician:true, alive:true, age:33},
+  {name:"Elon Musk", male:true, fromAsia:false, musician:false, alive:true, age:53},
+  {name:"MrBeast", male:true, fromAsia:false, musician:false, alive:true, age:25},
+  {name:"Mr. Bean", male:true, fromAsia:false, musician:false, alive:true, age:67}
 ];
 
 let people = [];
 let remaining = [];
 let qIndex = 0;
+let currentGuess = null;
+let ageGroups = [];
 
 const questions = [
   {text:"Is your character male?", key:"male"},
@@ -91,70 +113,106 @@ const questions = [
 const loadingEl = document.getElementById("loading");
 const questionEl = document.getElementById("question");
 const btnGroup = document.querySelector(".btn-group");
+const yesNoGroup = document.getElementById("yesno-group");
+const addForm = document.getElementById("add-character-form");
 
-// Function to fetch live people from Wikidata
-async function fetchLivePeople() {
-  try {
-    const query = `
-      SELECT ?person ?personLabel ?genderLabel ?countryLabel ?occupationLabel ?death WHERE {
-        ?person wdt:P31 wd:Q5.
-        OPTIONAL { ?person wdt:P21 ?gender. }
-        OPTIONAL { ?person wdt:P27 ?country. }
-        OPTIONAL { ?person wdt:P106 ?occupation. }
-        OPTIONAL { ?person wdt:P570 ?death. }
-        SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
-      } LIMIT 20
-    `;
-    const url = "https://query.wikidata.org/sparql?query="+encodeURIComponent(query);
-    const res = await fetch(url, { headers: {"Accept":"application/sparql-results+json"}});
-    const data = await res.json();
-    const livePeople = data.results.bindings.map(b=>({
-      name: b.personLabel?.value || "Unknown",
-      male: b.genderLabel?.value==="male",
-      fromAsia: b.countryLabel?.value && /India|Nepal|China|Japan|Korea|Pakistan|Bangladesh|Sri Lanka|Thailand|Indonesia/i.test(b.countryLabel.value),
-      musician: b.occupationLabel?.value && /singer|musician|composer|rapper|guitarist/i.test(b.occupationLabel.value),
-      alive: !b.death
-    }));
-    people = [...offlinePeople, ...livePeople];
-    startGame();
-  } catch(e) {
-    console.log("Live fetch failed, using offline dataset", e);
-    people = [...offlinePeople];
-    startGame();
+// Function to create age group questions
+function createAgeQuestions() {
+  const ages = people.filter(p=>p.age).map(p=>p.age);
+  if(!ages.length) return [];
+  const min = Math.min(...ages);
+  const max = Math.max(...ages);
+  const step = Math.ceil((max - min)/4);
+  const groups = [];
+  for(let i=min;i<=max;i+=step){
+    groups.push({min:i, max:i+step-1, text:`Is your character between ${i} and ${i+step-1} years old?`, key:`age_${i}_${i+step-1}`});
   }
+  return groups;
 }
 
-function startGame() {
-  remaining = [...people];
-  qIndex = 0;
+// Add age questions dynamically
+function addAgeQuestions() {
+  const ageQs = createAgeQuestions();
+  ageQs.forEach(q=>{
+    questions.push(q);
+  });
+}
+
+// Start game
+function startGame(){
+  remaining=[...people];
+  qIndex=0;
   loadingEl.style.display="none";
   questionEl.style.display="block";
   btnGroup.style.display="flex";
+  yesNoGroup.style.display="none";
+  addForm.style.display="none";
+  addAgeQuestions();
   showQuestion();
 }
 
-function showQuestion() {
-  if(qIndex<questions.length) questionEl.textContent = questions[qIndex].text;
-  else guessCharacter();
+function showQuestion(){
+  if(qIndex<questions.length){
+    const q=questions[qIndex];
+    questionEl.textContent=q.text;
+  }else{
+    makeGuess();
+  }
 }
 
-function answer(ans) {
-  const key = questions[qIndex].key;
-  const yes = ans==="yes";
-  remaining = remaining.filter(c=>c[key]===yes);
+function answer(ans){
+  const q=questions[qIndex];
+  const yes=ans==="yes";
+  if(q.key.startsWith("age_")){
+    const parts=q.key.split("_");
+    const min=parseInt(parts[1]), max=parseInt(parts[2]);
+    remaining=remaining.filter(c=>c.age? (yes? c.age>=min && c.age<=max : c.age<min || c.age>max) : true);
+  }else{
+    remaining=remaining.filter(c=>c[q.key]===yes);
+  }
   qIndex++;
-  if(remaining.length<=1 || qIndex>=questions.length) guessCharacter();
+  if(remaining.length<=1 || qIndex>=questions.length) makeGuess();
   else showQuestion();
 }
 
-function guessCharacter() {
+function makeGuess(){
   btnGroup.style.display="none";
-  if(remaining.length===0) questionEl.textContent="I couldn’t guess your character 😅";
-  else questionEl.textContent = `I guess... ${remaining[Math.floor(Math.random()*remaining.length)].name}! 🎯`;
+  yesNoGroup.style.display="flex";
+  if(remaining.length===0){
+    questionEl.textContent="I couldn’t guess your character 😅";
+    currentGuess=null;
+  }else{
+    currentGuess=remaining[Math.floor(Math.random()*remaining.length)];
+    questionEl.textContent=`I guess... ${currentGuess.name}! 🎯`;
+  }
 }
 
-// Start fetching
-fetchLivePeople();
+function guessConfirmed(correct){
+  yesNoGroup.style.display="none";
+  if(correct){
+    questionEl.textContent="🎉 Yay! I guessed it right!";
+  }else{
+    addForm.style.display="flex";
+  }
+}
+
+function addCharacter(){
+  const name=document.getElementById("new-name").value.trim();
+  const age=parseInt(document.getElementById("new-age").value);
+  if(!name || !age) return alert("Enter name and age!");
+  const male=document.getElementById("new-gender").value==="male";
+  const fromAsia=document.getElementById("new-asia").value==="true";
+  const musician=document.getElementById("new-musician").value==="true";
+  const alive=document.getElementById("new-alive").value==="true";
+  people.push({name,male,fromAsia,musician,alive,age});
+  addForm.style.display="none";
+  questionEl.textContent=`Thanks! I added ${name}. Restarting game...`;
+  setTimeout(startGame,1500);
+}
+
+// Start with offline dataset (for simplicity, live fetch can be added as before)
+people=[...offlinePeople];
+startGame();
 </script>
 </body>
 </html>
