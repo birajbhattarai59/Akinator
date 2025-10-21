@@ -1,259 +1,188 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Mini Akinator — Biraj Bhattarai</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mini Akinator — Wikipedia + Nepal Edition</title>
   <style>
-    :root{--bg:#0f1724;--card:#0b1220;--accent:#10b981;--muted:#94a3b8}
-    body{margin:0;background:linear-gradient(180deg,#071022,#081426);color:#e6eef8;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
-    .app{width:960px;max-width:96vw;background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);border-radius:12px;padding:20px;display:grid;grid-template-columns:1fr 360px;gap:18px;box-shadow:0 10px 30px rgba(2,6,23,0.7)}
-    header{grid-column:1/-1;display:flex;gap:12px;align-items:center}
-    header h1{margin:0;font-size:18px}
-    .left{padding:18px;background:var(--card);border-radius:10px}
-    .right{padding:18px;background:rgba(255,255,255,0.02);border-radius:10px}
-    .question{font-size:20px;margin-bottom:10px}
-    .btn-row{display:flex;gap:10px}
-    .primary{background:var(--accent);color:#042024;border:none;padding:10px 14px;border-radius:8px;cursor:pointer;font-weight:600}
-    .ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:10px 14px;border-radius:8px;color:#cfe7dd;cursor:pointer}
-    .guess-card{padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.03)}
-    .small{font-size:13px;color:var(--muted)}
-    @media (max-width:880px){ .app{grid-template-columns:1fr} .right{order:2} }
+    :root {
+      --bg: #0f1724;
+      --card: #0b1220;
+      --accent: #10b981;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Poppins", "Segoe UI", sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .game-box {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 30px;
+      max-width: 460px;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      width: 100%;
+    }
+
+    h1 {
+      color: var(--accent);
+      font-size: 1.8rem;
+    }
+
+    #question {
+      margin: 25px 0;
+      font-size: 1.1rem;
+      min-height: 2em;
+    }
+
+    .btn-group {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 22px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: 0.25s;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+      background: #0ea271;
+    }
+
+    footer {
+      margin-top: 20px;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    #loading {
+      color: var(--muted);
+      font-style: italic;
+    }
   </style>
 </head>
 <body>
-  <div class="app" role="application" aria-label="Mini Akinator">
-    <header>
-      <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 24 24'><circle cx='12' cy='12' r='10' fill='%2310b981'/><path fill='%2308140b' d='M7 12c0-2.8 2.2-5 5-5s5 2.2 5 5-2.2 5-5 5-5-2.2-5-5z'/></svg>" alt="" style="width:44px;height:44px;border-radius:8px;">
-      <div>
-        <h1>Mini Akinator</h1>
-        <div class="small">Works offline. By Biraj Bhattarai.</div>
-      </div>
-    </header>
-
-    <section class="left">
-      <div class="question" id="questionText">Ready? Think of a character and I'll start.</div>
-      <div class="small">Questions asked: <span id="askedCount">0</span> · Candidates left: <span id="cLeft">0</span></div>
-      <div style="height:12px;background:rgba(255,255,255,0.03);border-radius:999px;margin:10px 0"><i id="progress" style="display:block;height:100%;width:0;background:linear-gradient(90deg,#10b981,#34d399);border-radius:999px"></i></div>
-      <div class="btn-row" style="margin-bottom:10px">
-        <button class="primary" id="yesBtn">Yes</button>
-        <button class="ghost" id="noBtn">No</button>
-        <button class="ghost" id="idkBtn">I don't know</button>
-        <button class="ghost" id="resetBtn" style="margin-left:auto">Reset</button>
-      </div>
-
-      <div id="candidatesList" class="small" style="margin-bottom:10px">Candidates: —</div>
-
-      <div id="guessCard" class="guess-card" hidden>
-        <div style="font-weight:700" id="guessTitle">Is it ...?</div>
-        <div class="small" id="guessDesc">Confidence: —</div>
-        <div style="margin-top:8px;display:flex;gap:8px">
-          <button class="primary" id="confirmGuess">Yes — correct</button>
-          <button class="ghost" id="wrongGuess">No — add</button>
-        </div>
-      </div>
-
-      <div id="finishCard" class="guess-card" style="margin-top:10px" hidden>
-        <div style="font-weight:700">Add Character</div>
-        <form id="addForm" style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
-          <input id="newName" placeholder="Name" required />
-          <textarea id="newDesc" rows="2" placeholder="Short description"></textarea>
-          <div id="traitsGrid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px"></div>
-          <div style="display:flex;gap:8px">
-            <button class="primary" type="submit">Add</button>
-            <button class="ghost" type="button" id="cancelAdd">Cancel</button>
-          </div>
-          <div id="addResult" class="small" style="display:none"></div>
-        </form>
-      </div>
-    </section>
-
-    <aside class="right">
-      <div style="font-weight:700">Game stats</div>
-      <div class="small" style="margin-top:6px">Asked: <span id="statAsked">0</span></div>
-      <div class="small">Candidates: <span id="statCand">0</span></div>
-      <div class="small">Traits: <span id="statTraits">0</span></div>
-
-      <hr style="opacity:.06;margin:14px 0">
-
-      <div style="font-weight:700">DB sample</div>
-      <div id="dbPreview" class="small" style="margin-top:8px;max-height:260px;overflow:auto"></div>
-    </aside>
+  <div class="game-box">
+    <h1>🧞 Mini Akinator — Wikipedia + Nepal Edition</h1>
+    <p id="loading">Fetching live Wikipedia data...</p>
+    <p id="question" style="display:none;"></p>
+    <div class="btn-group" style="display:none;">
+      <button onclick="answer('yes')">Yes</button>
+      <button onclick="answer('no')">No</button>
+    </div>
+    <footer>© 2025 Mini Akinator — Nepal & Wikipedia Edition</footer>
   </div>
 
-<script>
-/* CONFIG */
-window.API_BASE = null; // frontend-only
+  <script>
+    let people = [];
+    let remaining = [];
+    let qIndex = 0;
 
-const TRAITS = {
-  real: "Is real / Non-fictional",
-  male: "Is male",
-  female: "Is female",
-  fromNepal: "From Nepal",
-  singer: "Is a singer",
-  actor: "Is an actor",
-  athlete: "Is an athlete",
-  activist: "Is an activist",
-  politician: "Is a politician (General/Male)",
-  politician_female: "Is a female politician",
-  fiction_writer: "Is a fiction writer",
-  director: "Is a movie director",
-  comedian: "Is a comedian",
-  royal: "Is a member of a royal family",
-  historical: "Lived primarily before the year 2000",
-  writer: "Is a general author/poet",
-  scientist: "Is a scientist/inventor",
-  philanthropist: "Is a philanthropist or major donor",
-  sports_official: "Is a sports team manager or official",
-  music_composer: "Primarily known as a composer/music director",
-  fictional: "Is fictional",
-  anime: "From anime/manga",
-  cartoon: "From Western cartoons (e.g., Disney, WB)"
-};
+    const customPeople = [
+      { name: "Biraj Bhattarai", male: true, fromAsia: true, musician: true, alive: true },
+      { name: "Raju Lama", male: true, fromAsia: true, musician: true, alive: true },
+      { name: "Sabin Rai", male: true, fromAsia: true, musician: true, alive: true },
+      { name: "Bartika Eam Rai", male: false, fromAsia: true, musician: true, alive: true },
+      { name: "Sajjan Raj Vaidya", male: true, fromAsia: true, musician: true, alive: true },
+      { name: "Neetesh Jung Kunwar", male: true, fromAsia: true, musician: true, alive: true }
+    ];
 
-/* Local sample DB with Biraj included */
-let characters = [
-  // --- CORE 20 CHARACTERS ---
-  { name: "Rajesh Hamal", desc:"Nepali film actor", traits:{ real:true, male:true, fromNepal:true, actor:true }},
-  { name: "Rekha Thapa", desc:"Nepali actress and producer", traits:{ real:true, female:true, fromNepal:true, actor:true, director:true }},
-  { name: "Biraj Bhattarai", desc:"Nepali musical artist", traits:{ real:true, male:true, fromNepal:true, singer:true }},
-  { name: "Anuradha Koirala", desc:"Nepali activist (Maiti Nepal)", traits:{ real:true, female:true, fromNepal:true, activist:true, philanthropist:true }},
-  { name: "Narayan Gopal", desc:"Legendary Nepali singer (deceased)", traits:{ real:true, male:true, fromNepal:true, singer:true, historical:true, music_composer:true }},
-  { name: "Nabin K Bhattarai", desc:"Nepali pop singer", traits:{ real:true, male:true, fromNepal:true, singer:true }},
-  { name: "Lionel Messi", desc:"Footballer", traits:{ real:true, male:true, athlete:true }},
-  { name: "Pikachu", desc:"Pokemon creature", traits:{ real:false, fictional:true, anime:true, cartoon:false }},
-  { name: "Sherlock Holmes", desc:"Fictional detective", traits:{ real:false, fictional:true, fiction_writer:false }},
-  { name: "Naruto Uzumaki", desc:"Anime character", traits:{ real:false, fictional:true, anime:true, cartoon:false }},
-  { name: "Maha Sanchay", desc:"Nepali comedy duo (Madan Krishna/Hari Bansha)", traits:{ real:true, male:true, fromNepal:true, actor:true, comedian:true }},
-  { name: "B.P. Koirala", desc:"First democratically elected PM of Nepal, writer", traits:{ real:true, male:true, fromNepal:true, politician:true, fiction_writer:true, historical:true, writer:true }},
-  { name: "Gyanendra Shah", desc:"Last King of Nepal", traits:{ real:true, male:true, fromNepal:true, royal:true, historical:true }},
-  { name: "Deepak Raj Giri", desc:"Nepali comedian, actor, and director", traits:{ real:true, male:true, fromNepal:true, actor:true, comedian:true, director:true }},
-  { name: "Parijat", desc:"Nepali writer (Shirisha ko Phool)", traits:{ real:true, female:true, fromNepal:true, fiction_writer:true, historical:true, writer:true }},
-  { name: "J.K. Rowling", desc:"British author (Harry Potter)", traits:{ real:true, female:true, fiction_writer:true, writer:true }},
-  { name: "Barack Obama", desc:"Former US President", traits:{ real:true, male:true, politician:true }},
-  { name: "Mickey Mouse", desc:"Iconic Disney cartoon character", traits:{ real:false, fictional:true, cartoon:true, anime:false }},
-  { name: "Muhammad Ali", desc:"American boxing legend", traits:{ real:true, male:true, athlete:true, historical:true }},
-  { name: "Alfred Hitchcock", desc:"Legendary film director", traits:{ real:true, male:true, director:true, historical:true }},
-  
-  // --- SECOND 10 CHARACTERS ---
-  { name: "Laxmi Prasad Devkota", desc:"Great poet of Nepal (Mahakavi)", traits:{ real:true, male:true, fromNepal:true, writer:true, historical:true, fiction_writer:true }},
-  { name: "Pasang Lhamu Sherpa", desc:"First Nepali woman to climb Mt. Everest", traits:{ real:true, female:true, fromNepal:true, athlete:true, historical:true, activist:true }},
-  { name: "Prachanda (Puspa Kamal Dahal)", desc:"Current Prime Minister of Nepal", traits:{ real:true, male:true, fromNepal:true, politician:true }},
-  { name: "Dayahang Rai", desc:"Prominent Nepali actor and theatre artist", traits:{ real:true, male:true, fromNepal:true, actor:true }},
-  { name: "Aruna Lama", desc:"Legendary Nepali singer (deceased)", traits:{ real:true, female:true, fromNepal:true, singer:true, historical:true }},
-  { name: "Albert Einstein", desc:"Theoretical physicist (E=mc²)", traits:{ real:true, male:true, scientist:true, historical:true }},
-  { name: "Malala Yousafzai", desc:"Pakistani activist for female education", traits:{ real:true, female:true, activist:true }},
-  { name: "Elon Musk", desc:"CEO of Tesla and SpaceX", traits:{ real:true, male:true, scientist:false, philanthropist:true }},
-  { name: "SpongeBob SquarePants", desc:"Fictional cartoon character", traits:{ real:false, fictional:true, cartoon:true, anime:false }},
-  { name: "Issac Newton", desc:"English physicist and mathematician", traits:{ real:true, male:true, scientist:true, historical:true }},
+    const questions = [
+      { text: "Is your character male?", key: "male" },
+      { text: "Is your character from Asia?", key: "fromAsia" },
+      { text: "Is your character a musician?", key: "musician" },
+      { text: "Is your character still alive?", key: "alive" }
+    ];
 
-  // --- NEW 30 CHARACTERS (Final Expansion to 50) ---
+    async function fetchPeople() {
+      const query = `
+        SELECT ?person ?personLabel ?genderLabel ?countryLabel ?occupationLabel ?death WHERE {
+          ?person wdt:P31 wd:Q5.
+          OPTIONAL { ?person wdt:P21 ?gender. }
+          OPTIONAL { ?person wdt:P27 ?country. }
+          OPTIONAL { ?person wdt:P106 ?occupation. }
+          OPTIONAL { ?person wdt:P570 ?death. }
+          SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
+        } LIMIT 30
+      `;
+      const url = "https://query.wikidata.org/sparql?query=" + encodeURIComponent(query);
+      const res = await fetch(url, { headers: { Accept: "application/sparql-results+json" } });
+      const data = await res.json();
 
-  // More Nepali Figures
-  { name: "Tulsi Ghimire", desc:"Veteran Nepali film director/actor", traits:{ real:true, male:true, fromNepal:true, director:true, actor:true }},
-  { name: "Khadga Prasad Oli (KP Oli)", desc:"Former Prime Minister of Nepal", traits:{ real:true, male:true, fromNepal:true, politician:true }},
-  { name: "Bidya Devi Bhandari", desc:"Former President of Nepal", traits:{ real:true, female:true, fromNepal:true, politician_female:true }},
-  { name: "Harihar Sharma", desc:"Renowned Nepali theatre artist and actor", traits:{ real:true, male:true, fromNepal:true, actor:true }},
-  { name: "Amrit Gurung", desc:"Lead singer of Nepali band Nepathya", traits:{ real:true, male:true, fromNepal:true, singer:true }},
-  { name: "Deepa Shree Niraula", desc:"Nepali actress, comedian, and director", traits:{ real:true, female:true, fromNepal:true, actor:true, comedian:true, director:true }},
-  { name: "Sunil Thapa", desc:"Prominent Nepali villain/character actor", traits:{ real:true, male:true, fromNepal:true, actor:true }},
-  { name: "Jharana Thapa", desc:"Nepali actress and director", traits:{ real:true, female:true, fromNepal:true, actor:true, director:true }},
-  { name: "Buddha (Siddhartha Gautam)", desc:"Founder of Buddhism (Born in Nepal)", traits:{ real:true, male:true, historical:true, activist:true }},
-  { name: "Captain Marvel (Brie Larson)", desc:"Fictional superhero in the MCU", traits:{ real:false, fictional:true, female:true }},
+      const wikiPeople = data.results.bindings.map(b => ({
+        name: b.personLabel?.value || "Unknown",
+        male: b.genderLabel?.value === "male",
+        fromAsia: b.countryLabel?.value && /India|Nepal|China|Japan|Korea|Pakistan|Bangladesh|Sri Lanka|Thailand|Indonesia/i.test(b.countryLabel.value),
+        musician: b.occupationLabel?.value && /singer|musician|composer|rapper|guitarist/i.test(b.occupationLabel.value),
+        alive: !b.death
+      }));
 
-  // More International Figures (Sports, Music, Science)
-  { name: "Cristiano Ronaldo", desc:"Portuguese Footballer", traits:{ real:true, male:true, athlete:true }},
-  { name: "Michael Jordan", desc:"American basketball legend", traits:{ real:true, male:true, athlete:true, historical:true }},
-  { name: "Sachin Tendulkar", desc:"Indian cricket legend", traits:{ real:true, male:true, athlete:true }},
-  { name: "Mother Teresa", desc:"Catholic saint and humanitarian", traits:{ real:true, female:true, historical:true, activist:true, philanthropist:true }},
-  { name: "Jane Goodall", desc:"Primatologist and anthropologist", traits:{ real:true, female:true, scientist:true, activist:true }},
-  { name: "A.R. Rahman", desc:"Indian music composer and singer", traits:{ real:true, male:true, singer:true, music_composer:true }},
-  { name: "Steve Jobs", desc:"Co-founder of Apple", traits:{ real:true, male:true, historical:true }},
-  { name: "Oprah Winfrey", desc:"American media executive and philanthropist", traits:{ real:true, female:true, philanthropist:true, actor:true }},
-  { name: "Quentin Tarantino", desc:"American film director", traits:{ real:true, male:true, director:true }},
-  { name: "Jeff Bezos", desc:"Founder of Amazon", traits:{ real:true, male:true, philanthropist:true }},
+      // Combine local + Wikipedia people
+      people = [...customPeople, ...wikiPeople];
+      remaining = [...people];
 
-  // More Fictional Characters
-  { name: "Goku", desc:"Protagonist of Dragon Ball Z", traits:{ real:false, fictional:true, male:true, anime:true, cartoon:false }},
-  { name: "Wonder Woman", desc:"DC Comics superhero", traits:{ real:false, fictional:true, female:true, cartoon:false }},
-  { name: "Doraemon", desc:"Japanese robotic cat (manga/anime)", traits:{ real:false, fictional:true, male:true, anime:true, cartoon:false }},
-  { name: "Captain Haddock", desc:"Character from The Adventures of Tintin", traits:{ real:false, fictional:true, male:true, historical:true }},
-  { name: "Harry Potter", desc:"Protagonist of the book series", traits:{ real:false, fictional:true, male:true, fiction_writer:false }},
+      document.getElementById("loading").style.display = "none";
+      document.getElementById("question").style.display = "block";
+      document.querySelector(".btn-group").style.display = "flex";
 
-  // Miscellaneous Figures
-  { name: "Dalai Lama", desc:"Spiritual leader of Tibetan Buddhism", traits:{ real:true, male:true, activist:true }},
-  { name: "Bill Gates", desc:"Co-founder of Microsoft", traits:{ real:true, male:true, philanthropist:true }},
-  { name: "Jacinda Ardern", desc:"Former Prime Minister of New Zealand", traits:{ real:true, female:true, politician_female:true }},
-  { name: "Siddhartha Rana", desc:"Nepali music producer/composer", traits:{ real:true, male:true, fromNepal:true, music_composer:true }},
-  { name: "Roger Federer", desc:"Swiss tennis player", traits:{ real:true, male:true, athlete:true }}
-];
+      showQuestion();
+    }
 
-/* GAME STATE */
-let askedQuestions = [], questionCount=0, candidates=[], history=[];
-const MAX_QUESTIONS = 12;
+    function showQuestion() {
+      if (qIndex < questions.length) {
+        document.getElementById("question").textContent = questions[qIndex].text;
+      } else {
+        guessCharacter();
+      }
+    }
 
-/* DOM */
-const qText = document.getElementById('questionText');
-const askedCount = document.getElementById('askedCount');
-const cLeft = document.getElementById('cLeft');
-const yesBtn = document.getElementById('yesBtn');
-const noBtn = document.getElementById('noBtn');
-const idkBtn = document.getElementById('idkBtn');
-const resetBtn = document.getElementById('resetBtn');
-const progress = document.getElementById('progress');
-const candidatesList = document.getElementById('candidatesList');
-const guessCard = document.getElementById('guessCard');
-const guessTitle = document.getElementById('guessTitle');
-const guessDesc = document.getElementById('guessDesc');
-const confirmGuess = document.getElementById('confirmGuess');
-const wrongGuess = document.getElementById('wrongGuess');
-const finishCard = document.getElementById('finishCard');
-const addForm = document.getElementById('addForm');
-const newNameIn = document.getElementById('newName');
-const newDescIn = document.getElementById('newDesc');
-const traitsGrid = document.getElementById('traitsGrid');
-const cancelAdd = document.getElementById('cancelAdd');
-const addResult = document.getElementById('addResult');
-const statAsked = document.getElementById('statAsked');
-const statCand = document.getElementById('statCand');
-const statTraits = document.getElementById('statTraits');
-const dbPreview = document.getElementById('dbPreview');
+    function answer(ans) {
+      const key = questions[qIndex].key;
+      const yes = ans === "yes";
+      remaining = remaining.filter(c => c[key] === yes);
+      qIndex++;
 
-/* HELPERS */
-function updateDbPreview(){ dbPreview.innerHTML=''; characters.forEach(c=>{ const d=document.createElement('div'); d.style.padding='6px 0'; d.innerHTML=`<strong>${c.name}</strong> <div style="color:#94a3b8;font-size:13px">${c.desc||''}</div><div style="color:#94a3b8;font-size:13px">traits: ${Object.keys(c.traits||{}).filter(t=>c.traits[t]).join(', ')||'—'}</div>`; dbPreview.appendChild(d); }); statTraits.textContent = Object.keys(TRAITS).length; statCand.textContent = characters.length; } // <-- Added character count update here
+      if (remaining.length <= 1 || qIndex >= questions.length) {
+        guessCharacter();
+      } else {
+        showQuestion();
+      }
+    }
 
-function renderTraitCheckboxes(){ traitsGrid.innerHTML=''; Object.keys(TRAITS).forEach(k=>{ const lbl=document.createElement('label'); lbl.style.display='flex'; lbl.style.gap='8px'; lbl.innerHTML=`<input type="checkbox" value="${k}"> ${TRAITS[k]}`; traitsGrid.appendChild(lbl); }); }
+    function guessCharacter() {
+      const q = document.getElementById("question");
+      const btns = document.querySelector(".btn-group");
+      btns.style.display = "none";
 
-function startGame(){ askedQuestions=[]; questionCount=0; history=[]; guessCard.hidden=true; finishCard.hidden=true; addResult.style.display='none'; newNameIn.value=''; newDescIn.value=''; candidates=characters.map((_,i)=>i); updateUIForNextQuestion("Think of a character — I'll ask questions."); }
+      if (remaining.length === 0) {
+        q.textContent = "I couldn’t guess your character 😅 (try again)";
+      } else {
+        const guess = remaining[Math.floor(Math.random() * remaining.length)];
+        q.textContent = `I guess... ${guess.name}! 🎯`;
+      }
+    }
 
-function updateUIForNextQuestion(initialText){ askedCount.textContent=questionCount; cLeft.textContent=candidates.length; statAsked.textContent=questionCount; statCand.textContent=characters.length; updateDbPreview(); if(candidates.length<=1 || questionCount>=MAX_QUESTIONS){ makeGuess(); return; } const remainingTraits = Object.keys(TRAITS).filter(t=>!askedQuestions.includes(t)); let q=null; let bestScore=Infinity; remainingTraits.forEach(tr=>{ let ct=0; candidates.forEach(i=>{if(characters[i].traits && characters[i].traits[tr]) ct++;}); const n=candidates.length; if(ct===0||ct===n) return; const score=Math.abs(n/2-ct); if(score<bestScore){bestScore=score; q=tr;} }); if(!q) q=remainingTraits[0]||Object.keys(TRAITS)[0]; qText.dataset.currentTrait=q; qText.textContent=initialText?initialText:TRAITS[q]; progress.style.width=Math.min(100,Math.round((questionCount/MAX_QUESTIONS)*100))+'%'; candidatesList.textContent="Candidates: "+candidates.map(i=>characters[i].name).slice(0,8).join(', ')+(candidates.length>8?', ...':''); }
-
-function answer(ans){ const t=qText.dataset.currentTrait; askedQuestions.push(t); questionCount++; history.push({q:t,ans}); if(ans==='yes') candidates=candidates.filter(i=>!!characters[i].traits[t]); else if(ans==='no') candidates=candidates.filter(i=>!characters[i].traits[t]); if(candidates.length===0){ qText.textContent="I couldn't find a match — add it!"; finishCard.hidden=false; guessCard.hidden=true; return; } if(candidates.length<=2 || questionCount>=MAX_QUESTIONS){ makeGuess(); return; } updateUIForNextQuestion(); }
-
-function makeGuess(){ if(candidates.length===0){ qText.textContent="No match found. Add the character."; finishCard.hidden=false; guessCard.hidden=true; return; } let bestIdx=candidates[0]; let bestConf=computeConfidence(bestIdx); candidates.forEach(i=>{ const c=computeConfidence(i); if(c>bestConf){bestConf=c;bestIdx=i;} }); const p=characters[bestIdx]; guessCard.hidden=false; finishCard.hidden=true; guessTitle.textContent=`Is it ${p.name}?`; guessDesc.textContent=`${p.desc||''} · Confidence: ${(bestConf*100).toFixed(0)}%`; qText.textContent="I have a guess — is this your character?"; }
-
-function computeConfidence(idx){ if(history.length===0) return 0.5; let matches=0,total=0; history.forEach(h=>{ if(h.ans==='idk') return; total++; const val=!!characters[idx].traits[h.q]; if((h.ans==='yes' && val) || (h.ans==='no' && !val)) matches++; }); return total===0?0.5:Math.max(0.05,Math.min(0.99,matches/total)); }
-
-function confirmCorrect(){ qText.textContent="Yay! I guessed it."; guessCard.hidden=true; }
-
-function handleWrongGuess(){ qText.textContent="Oh no — add the correct character!"; guessCard.hidden=true; finishCard.hidden=false; }
-
-function addCharacterFromForm(e){ e.preventDefault(); const name=newNameIn.value.trim(); const desc=newDescIn.value.trim(); if(!name) return; const boxes=Array.from(traitsGrid.querySelectorAll('input[type="checkbox"]')); const traitsObj={}; Object.keys(TRAITS).forEach(k=>traitsObj[k]=false); boxes.forEach(b=>{if(b.checked) traitsObj[b.value]=true;}); characters.push({name,desc,traits:traitsObj}); addResult.style.display='block'; addResult.textContent=`${name} added locally.`; setTimeout(()=>{ startGame(); addResult.style.display='none'; },900); }
-
-/* EVENTS */
-yesBtn.addEventListener('click',()=>answer('yes'));
-noBtn.addEventListener('click',()=>answer('no'));
-idkBtn.addEventListener('click',()=>answer('idk'));
-resetBtn.addEventListener('click',startGame);
-confirmGuess.addEventListener('click',confirmCorrect);
-wrongGuess.addEventListener('click',handleWrongGuess);
-addForm.addEventListener('submit',addCharacterFromForm);
-cancelAdd.addEventListener('click',()=>{ finishCard.hidden=true; startGame(); });
-
-/* INIT */
-renderTraitCheckboxes();
-updateDbPreview(); // Call first to set initial trait and character counts in the right panel
-startGame(); 
-</script>
+    fetchPeople();
+  </script>
 </body>
 </html>
